@@ -14,6 +14,7 @@ export const apiGetServico = async (servicoId: string) => {
 
 export const apiPostServico = async (servico: Servico) => {
   const response = await http.post(ROTA.SERVICO.CRIAR, servico);
+  return response;
 };
 
 export const apiPutServico = async (servicoId: string, servico: Servico) => {
@@ -21,8 +22,10 @@ export const apiPutServico = async (servicoId: string, servico: Servico) => {
     `${ROTA.SERVICO.ATUALIZAR}/${servicoId}`,
     servico,
   );
+  return response;
 };
 
 export const apiDeleteServico = async (servicoId: string) => {
   const response = await http.delete(`${ROTA.SERVICO.EXCLUIR}/${servicoId}`);
+  return response;
 };
