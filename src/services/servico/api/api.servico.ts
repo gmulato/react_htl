@@ -1,28 +1,28 @@
 import { http } from "../../axios/config.axios";
 import { ROTA } from "../../router/url";
-import type { Cidade } from "../type/Cidade";
+import type { Servico } from "../type/Servico";
 
-export const apiGetCidades = async () => {
-  const response = await http.get(ROTA.CIDADE.LISTAR);
+export const apiGetServicos = async () => {
+  const response = await http.get(ROTA.SERVICO.LISTAR);
   return response;
 };
 
-export const apiGetCidade = async (idCidade: string) => {
-  const response = await http.get(`${ROTA.CIDADE.POR_ID}/${idCidade}`);
+export const apiGetServico = async (servicoId: string) => {
+  const response = await http.get(`${ROTA.SERVICO.POR_ID}/${servicoId}`);
   return response;
 };
 
-export const apiPostCidade = async (cidade: Cidade) => {
-  const response = await http.post(ROTA.CIDADE.CRIAR, cidade);
+export const apiPostServico = async (servico: Servico) => {
+  const response = await http.post(ROTA.SERVICO.CRIAR, servico);
 };
 
-export const apiPutCidade = async (idCidade: string, cidade: Cidade) => {
+export const apiPutServico = async (servicoId: string, servico: Servico) => {
   const response = await http.put(
-    `${ROTA.CIDADE.ATUALIZAR}/${idCidade}`,
-    cidade,
+    `${ROTA.SERVICO.ATUALIZAR}/${servicoId}`,
+    servico,
   );
 };
 
-export const apiDeleteCidade = async (idCidade: string) => {
-  const response = await http.delete(`${ROTA.CIDADE.EXCLUIR}/${idCidade}`);
+export const apiDeleteServico = async (servicoId: string) => {
+  const response = await http.delete(`${ROTA.SERVICO.EXCLUIR}/${servicoId}`);
 };
