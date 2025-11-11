@@ -1,7 +1,8 @@
 import type { RouteObject } from "react-router-dom";
 import Layout from "../../components/layout/Layout";
 import Dashboard from "../../views/Dashboard";
-import { ROTA } from "./url";
+import { DASHBOARD, ROTA } from "./url";
+import Servico from "../../views/Servico";
 
 export const routes: RouteObject[] = [
   {
@@ -9,9 +10,13 @@ export const routes: RouteObject[] = [
     element: <Layout />,
     children: [
       {
-        path: "/sistema/dashboard",
+        path: DASHBOARD,
         element: <Dashboard />,
-      }
+      },
+      {
+        path: ROTA.SERVICO.BASE,
+        element: <Servico />,
+      },
     ],
   },
 ];

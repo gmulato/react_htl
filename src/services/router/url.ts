@@ -1,4 +1,4 @@
-import { CIDADE } from "../cidade/constants/cidade.constants";
+import { SERVICO } from "../servico/constants/servico.constants";
 
 const ROTA_SISTEMA = "sistema";
 export const DASHBOARD = `/${ROTA_SISTEMA}/dashboard`;
@@ -12,6 +12,7 @@ const EXCLUIR = `excluir`;
 function gerarRotaSistema(entity: string) {
   const base = `${ROTA_SISTEMA}/${entity}`;
   return {
+    BASE: `/${base}`,
     LISTAR: `/${base}/${LISTAR}`,
     CRIAR: `/${base}/${CRIAR}`,
     POR_ID: `/${base}/${POR_ID}`,
@@ -21,5 +22,5 @@ function gerarRotaSistema(entity: string) {
 }
 
 export const ROTA = {
-  CIDADE: gerarRotaSistema(CIDADE.ALIAS),
+  SERVICO: gerarRotaSistema(SERVICO.ALIAS),
 };
