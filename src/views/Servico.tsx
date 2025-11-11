@@ -1,4 +1,7 @@
-import { useEffect, useState } from "react";
+import { CrudFormCard } from "../components/crud/CrudFormCard";
+import { CrudPageLayout } from "../components/crud/CrudPageLayout";
+import { CrudTable, type CrudTableColumn } from "../components/crud/CrudTable";
+import { useCrudEntity } from "../hooks/useCrudEntity";
 import {
   apiDeleteServico,
   apiGetServico,
@@ -9,336 +12,185 @@ import {
 import { SERVICO } from "../services/servico/constants/servico.constants";
 import type { Servico as ServicoModel } from "../services/servico/type/Servico";
 
-type FormState = ServicoModel;
-
-const INITIAL_FORM: FormState = { ...SERVICO.DADOS_INCIAIS };
+type ServicoForm = typeof SERVICO.DADOS_INCIAIS;
 
 export default function Servico() {
-  const [servicos, setServicos] = useState<ServicoModel[]>([]);
-  const [formState, setFormState] = useState<FormState>(INITIAL_FORM);
-  const [loadingList, setLoadingList] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    items,
+    form,
+    setField,
+    handleSubmit,
+    startCreate,
+    startEdit,
+    removeItem,
+    refresh,
+    resetForm,
+    loadingList,
+    saving,
+    deletingId,
+    feedback,
+    error,
+    isEditing,
+  } = useCrudEntity<ServicoModel, ServicoForm, ServicoModel>({
+    createInitialForm: () => ({ ...SERVICO.DADOS_INCIAIS }),
+    listRequest: apiGetServicos,
+    getRequest: apiGetServico,
+    createRequest: apiPostServico,
+    updateRequest: apiPutServico,
+    deleteRequest: apiDeleteServico,
+    toPayload: (data) => ({
+      nome: data.nome.trim(),
+      descricao: data.descricao.trim(),
+      valor: data.valor.trim(),
+    }),
+    mapToForm: (data) => ({
+      servicoId: data.servicoId ?? "",
+      nome: data.nome ?? "",
+      descricao: data.descricao ?? "",
+      valor: data.valor ?? "",
+    }),
+    messages: {
+      listError: SERVICO.OPERACAO.LISTAR.ERRO,
+      loadError: SERVICO.OPERACAO.POR_ID.ERRO,
+      createSuccess: SERVICO.OPERACAO.CRIAR.SUCESSO,
+      createError: SERVICO.OPERACAO.CRIAR.ERRO,
+      updateSuccess: SERVICO.OPERACAO.ATUALIZAR.SUCESSO,
+      updateError: SERVICO.OPERACAO.ATUALIZAR.ERRO,
+      deleteConfirm: SERVICO.OPERACAO.EXCLUIR.ACAO,
+      deleteSuccess: SERVICO.OPERACAO.EXCLUIR.SUCESSO,
+      deleteError: SERVICO.OPERACAO.EXCLUIR.ERRO,
+    },
+    idSelector: (item) => item.servicoId,
+  });
 
-  useEffect(() => {
-    listarServicos();
-  }, []);
-
-  const listarServicos = async () => {
-    try {
-      setLoadingList(true);
-      setError(null);
-      const { data } = await apiGetServicos();
-      setServicos(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error(err);
-      setError(SERVICO.OPERACAO.LISTAR.ERRO);
-    } finally {
-      setLoadingList(false);
-    }
-  };
-
-  const resetForm = () => {
-    setFormState(INITIAL_FORM);
-    setFeedback(null);
-    setError(null);
-  };
-
-  const handleChange = (field: keyof FormState, value: string) => {
-    setFormState((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleEdit = async (servicoId?: string) => {
-    if (!servicoId) {
-      return;
-    }
-    try {
-      setError(null);
-      const { data } = await apiGetServico(servicoId);
-      if (data) {
-        setFormState({
-          servicoId: data.servicoId ?? servicoId,
-          nome: data.nome ?? "",
-          descricao: data.descricao ?? "",
-          valor: data.valor ?? "",
-        });
-        setFeedback(null);
-      }
-    } catch (err) {
-      console.error(err);
-      setError(SERVICO.OPERACAO.POR_ID.ERRO);
-    }
-  };
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    try {
-      setSaving(true);
-      setFeedback(null);
-      setError(null);
-
-      const payload: ServicoModel = {
-        nome: formState.nome?.trim() ?? "",
-        descricao: formState.descricao?.trim() ?? "",
-        valor: formState.valor?.trim() ?? "",
-      };
-
-      if (formState.servicoId) {
-        await apiPutServico(formState.servicoId, payload);
-        setFeedback(SERVICO.OPERACAO.ATUALIZAR.SUCESSO);
-      } else {
-        await apiPostServico(payload);
-        setFeedback(SERVICO.OPERACAO.CRIAR.SUCESSO);
-      }
-
-      await listarServicos();
-      resetForm();
-    } catch (err) {
-      console.error(err);
-      setError(
-        formState.servicoId
-          ? SERVICO.OPERACAO.ATUALIZAR.ERRO
-          : SERVICO.OPERACAO.CRIAR.ERRO,
-      );
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleDelete = async (servicoId?: string) => {
-    if (!servicoId) {
-      return;
-    }
-    const confirmed = window.confirm(SERVICO.OPERACAO.EXCLUIR.ACAO);
-    if (!confirmed) {
-      return;
-    }
-    try {
-      setDeletingId(servicoId);
-      setError(null);
-      setFeedback(null);
-      await apiDeleteServico(servicoId);
-      setFeedback(SERVICO.OPERACAO.EXCLUIR.SUCESSO);
-      await listarServicos();
-      if (formState.servicoId === servicoId) {
-        resetForm();
-      }
-    } catch (err) {
-      console.error(err);
-      setError(SERVICO.OPERACAO.EXCLUIR.ERRO);
-    } finally {
-      setDeletingId(null);
-    }
-  };
+  const columns: CrudTableColumn<ServicoModel>[] = [
+    {
+      header: SERVICO.LABEL.NOME,
+      render: (item) => item.nome ?? "-",
+    },
+    {
+      header: SERVICO.LABEL.DESC,
+      render: (item) => item.descricao ?? "-",
+    },
+    {
+      header: SERVICO.LABEL.VALOR,
+      render: (item) => item.valor ?? "-",
+    },
+    {
+      header: <span className="block text-right">Ações</span>,
+      headerClassName: "px-4 py-3",
+      className: "px-4 py-3",
+      render: (item) => (
+        <div className="flex items-center justify-end gap-2">
+          <button
+            type="button"
+            className="btn btn-edit px-3 py-1 text-xs"
+            onClick={() => item.servicoId && startEdit(item.servicoId)}
+          >
+            Editar
+          </button>
+          <button
+            type="button"
+            className="btn btn-delete px-3 py-1 text-xs"
+            onClick={() => item.servicoId && removeItem(item.servicoId)}
+            disabled={deletingId === item.servicoId}
+          >
+            {deletingId === item.servicoId ? "Excluindo..." : "Excluir"}
+          </button>
+        </div>
+      ),
+    },
+  ];
 
   return (
-    <div className="space-y-6">
-      <section className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {SERVICO.TITULO.LISTA}
-          </h1>
-          <p className="text-sm text-neutral-600">
-            Gerencie o cadastro de serviços do hotel.
-          </p>
+    <CrudPageLayout
+      title={SERVICO.TITULO.LISTA}
+      description="Gerencie o cadastro de serviços do hotel."
+      primaryActionLabel="Novo Serviço"
+      onPrimaryAction={startCreate}
+      error={error}
+      feedback={feedback}
+    >
+      <CrudFormCard
+        onSubmit={handleSubmit}
+        title={isEditing ? SERVICO.TITULO.ATUALIZAR : SERVICO.TITULO.CRIAR}
+        subtitle="Preencha as informações do serviço."
+        onCancel={resetForm}
+        isEditing={isEditing}
+        actionLabel={isEditing ? "Atualizar Serviço" : "Cadastrar Serviço"}
+        savingLabel={isEditing ? "Atualizando..." : "Cadastrando..."}
+        isSubmitting={saving}
+      >
+        <div className="space-y-1">
+          <label htmlFor={SERVICO.FIELDS.NOME} className="text-sm font-medium text-neutral-700">
+            {SERVICO.LABEL.NOME}
+          </label>
+          <input
+            id={SERVICO.FIELDS.NOME}
+            name={SERVICO.FIELDS.NOME}
+            value={form.nome}
+            onChange={(event) => setField("nome", event.target.value)}
+            placeholder="Informe o nome do serviço"
+            className="w-full rounded-xl border border-neutral-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+            required
+          />
         </div>
-        <button
-          type="button"
-          onClick={resetForm}
-          className="btn btn-add"
-        >
-          Novo Serviço
-        </button>
-      </section>
 
-      {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-          {error}
+        <div className="space-y-1">
+          <label htmlFor={SERVICO.FIELDS.DESC} className="text-sm font-medium text-neutral-700">
+            {SERVICO.LABEL.DESC}
+          </label>
+          <textarea
+            id={SERVICO.FIELDS.DESC}
+            name={SERVICO.FIELDS.DESC}
+            value={form.descricao}
+            onChange={(event) => setField("descricao", event.target.value)}
+            placeholder="Descreva o serviço"
+            rows={4}
+            className="w-full rounded-xl border border-neutral-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+            required
+          />
         </div>
-      )}
 
-      {feedback && (
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
-          {feedback}
+        <div className="space-y-1">
+          <label htmlFor={SERVICO.FIELDS.VALOR} className="text-sm font-medium text-neutral-700">
+            {SERVICO.LABEL.VALOR}
+          </label>
+          <input
+            id={SERVICO.FIELDS.VALOR}
+            name={SERVICO.FIELDS.VALOR}
+            value={form.valor}
+            onChange={(event) => setField("valor", event.target.value)}
+            placeholder="Informe o valor"
+            className="w-full rounded-xl border border-neutral-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+            required
+          />
         </div>
-      )}
+      </CrudFormCard>
 
-      <section className="grid gap-6 lg:grid-cols-5">
-        <form
-          onSubmit={handleSubmit}
-          className="lg:col-span-2 space-y-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm"
-        >
-          <header className="flex items-start justify-between gap-2">
-            <div>
-              <h2 className="text-lg font-semibold tracking-tight">
-                {formState.servicoId
-                  ? SERVICO.TITULO.ATUALIZAR
-                  : SERVICO.TITULO.CRIAR}
-              </h2>
-              <p className="text-sm text-neutral-600">
-                Preencha as informações do serviço.
-              </p>
-            </div>
-            {formState.servicoId && (
-              <button
-                type="button"
-                onClick={resetForm}
-                className="text-sm font-medium text-neutral-500 hover:text-neutral-800"
-              >
-                Cancelar edição
-              </button>
-            )}
-          </header>
-
-          <div className="space-y-1">
-            <label
-              htmlFor={SERVICO.FIELDS.NOME}
-              className="text-sm font-medium text-neutral-700"
-            >
-              {SERVICO.LABEL.NOME}
-            </label>
-            <input
-              id={SERVICO.FIELDS.NOME}
-              name={SERVICO.FIELDS.NOME}
-              value={formState.nome ?? ""}
-              onChange={(event) => handleChange("nome", event.target.value)}
-              placeholder="Informe o nome do serviço"
-              className="w-full rounded-xl border border-neutral-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
-              required
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label
-              htmlFor={SERVICO.FIELDS.DESC}
-              className="text-sm font-medium text-neutral-700"
-            >
-              {SERVICO.LABEL.DESC}
-            </label>
-            <textarea
-              id={SERVICO.FIELDS.DESC}
-              name={SERVICO.FIELDS.DESC}
-              value={formState.descricao ?? ""}
-              onChange={(event) => handleChange("descricao", event.target.value)}
-              placeholder="Descreva o serviço"
-              rows={4}
-              className="w-full rounded-xl border border-neutral-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
-              required
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label
-              htmlFor={SERVICO.FIELDS.VALOR}
-              className="text-sm font-medium text-neutral-700"
-            >
-              {SERVICO.LABEL.VALOR}
-            </label>
-            <input
-              id={SERVICO.FIELDS.VALOR}
-              name={SERVICO.FIELDS.VALOR}
-              value={formState.valor ?? ""}
-              onChange={(event) => handleChange("valor", event.target.value)}
-              placeholder="Informe o valor"
-              className="w-full rounded-xl border border-neutral-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
-              required
-            />
-          </div>
-
+      <div className="lg:col-span-3 space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold tracking-tight">
+            {SERVICO.OPERACAO.LISTAR.ACAO}
+          </h2>
           <button
-            type="submit"
-            className="btn btn-success w-full"
-            disabled={saving}
+            type="button"
+            onClick={refresh}
+            className="text-sm font-medium text-emerald-700 hover:text-emerald-900"
+            disabled={loadingList}
           >
-            {saving
-              ? "Salvando..."
-              : formState.servicoId
-                ? "Atualizar Serviço"
-                : "Cadastrar Serviço"}
+            {loadingList ? "Sincronizando..." : "Recarregar"}
           </button>
-        </form>
-
-        <div className="lg:col-span-3 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold tracking-tight">
-              {SERVICO.OPERACAO.LISTAR.ACAO}
-            </h2>
-            <button
-              type="button"
-              onClick={listarServicos}
-              className="text-sm font-medium text-emerald-700 hover:text-emerald-900"
-              disabled={loadingList}
-            >
-              {loadingList ? "Sincronizando..." : "Recarregar"}
-            </button>
-          </div>
-
-          <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
-            <table className="min-w-full divide-y divide-neutral-200 text-sm">
-              <thead className="bg-neutral-50 text-left text-xs font-semibold uppercase tracking-wide text-neutral-500">
-                <tr>
-                  <th className="px-4 py-3">{SERVICO.LABEL.NOME}</th>
-                  <th className="px-4 py-3">{SERVICO.LABEL.DESC}</th>
-                  <th className="px-4 py-3">{SERVICO.LABEL.VALOR}</th>
-                  <th className="px-4 py-3 text-right">Ações</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-100">
-                {loadingList ? (
-                  <tr>
-                    <td colSpan={4} className="px-4 py-6 text-center text-neutral-500">
-                      Carregando serviços...
-                    </td>
-                  </tr>
-                ) : servicos.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="px-4 py-6 text-center text-neutral-500">
-                      Nenhum serviço cadastrado até o momento.
-                    </td>
-                  </tr>
-                ) : (
-                  servicos.map((servico) => (
-                    <tr key={servico.servicoId ?? servico.nome}>
-                      <td className="px-4 py-3 font-medium text-neutral-800">
-                        {servico.nome ?? "-"}
-                      </td>
-                      <td className="px-4 py-3 text-neutral-600">
-                        {servico.descricao ?? "-"}
-                      </td>
-                      <td className="px-4 py-3 text-neutral-600">
-                        {servico.valor ?? "-"}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            type="button"
-                            className="btn btn-edit px-3 py-1 text-xs"
-                            onClick={() => handleEdit(servico.servicoId)}
-                          >
-                            Editar
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn-delete px-3 py-1 text-xs"
-                            onClick={() => handleDelete(servico.servicoId)}
-                            disabled={deletingId === servico.servicoId}
-                          >
-                            {deletingId === servico.servicoId
-                              ? "Excluindo..."
-                              : "Excluir"}
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
         </div>
-      </section>
-    </div>
+
+        <CrudTable
+          columns={columns}
+          data={items}
+          loading={loadingList}
+          loadingMessage="Carregando serviços..."
+          emptyMessage="Nenhum serviço cadastrado até o momento."
+        />
+      </div>
+    </CrudPageLayout>
   );
 }
