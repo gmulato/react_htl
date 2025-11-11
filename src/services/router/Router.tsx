@@ -3,6 +3,7 @@ import Layout from "../../components/layout/Layout";
 import Dashboard from "../../views/Dashboard";
 import { DASHBOARD, ROTA } from "./url";
 import Servico from "../../views/Servico";
+import Quarto from "../../views/Quarto";
 
 export const routes: RouteObject[] = [
   {
@@ -16,6 +17,10 @@ export const routes: RouteObject[] = [
       {
         path: ROTA.SERVICO.BASE,
         element: <Servico />,
+      },
+      {
+        path: ROTA.QUARTO.BASE,
+        element: <Quarto />,
       },
     ],
   },
