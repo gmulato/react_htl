@@ -84,14 +84,14 @@ export default function Servico() {
         <div className="flex items-center justify-end gap-2">
           <button
             type="button"
-            className="btn btn-edit px-3 py-1 text-xs"
+            className="btn btn-edit px-3 py-1 text-xs bg-emerald-500 hover:bg-emerald-600 rounded-md text-gray-100"
             onClick={() => item.servicoId && startEdit(item.servicoId)}
           >
             Editar
           </button>
           <button
             type="button"
-            className="btn btn-delete px-3 py-1 text-xs"
+            className="btn btn-delete px-3 py-1 text-xs bg-red-500 hover:bg-red-600 rounded-md text-gray-100"
             onClick={() => item.servicoId && removeItem(item.servicoId)}
             disabled={deletingId === item.servicoId}
           >

@@ -50,7 +50,7 @@ export function CrudFormCard({
 
       {children}
 
-      <button type="submit" className="btn btn-success w-full" disabled={isSubmitting}>
+      <button type="submit" className="btn btn-success w-full bg-emerald-500 hover:bg-emerald-600 rounded-md text-gray-100 py-2" disabled={isSubmitting}>
         {isSubmitting ? savingLabel : actionLabel}
       </button>
     </form>
