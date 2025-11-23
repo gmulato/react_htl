@@ -5,16 +5,19 @@ import {
   BedDouble,
   Menu,
   X,
-  PackagePlus
+  PackagePlus,
+  User,
 } from "lucide-react";
 import { ROTA, DASHBOARD } from "../../services/router/url";
 import { SERVICO } from "../../services/servico/constants/servico.constants";
 import { QUARTO } from "../../services/quarto/constants/quarto.constants";
+import { FUNCIONARIO } from "../../services/funcionario/constants/funcionario.constants";
 
 const NAV_ITEMS = [
   { to: `${DASHBOARD}`, label: "Dashboard", icon: Home, end: true },
   { to: `${ROTA.SERVICO.BASE}`, label: SERVICO.ENTITY + "s", icon: PackagePlus, end: true },
   { to: `${ROTA.QUARTO.BASE}`, label: QUARTO.ENTITY + "s", icon: BedDouble, end: true },
+  { to: `${ROTA.FUNCIONARIO.BASE}`, label: FUNCIONARIO.ENTITY + "s", icon: User, end: true },
 ];
 
 export default function HotelLayout() {

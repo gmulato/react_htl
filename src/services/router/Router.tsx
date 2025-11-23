@@ -4,6 +4,7 @@ import Dashboard from "../../views/Dashboard";
 import { DASHBOARD, ROTA } from "./url";
 import Servico from "../../views/Servico";
 import Quarto from "../../views/Quarto";
+import Funcionario from "../../views/Funcionario";
 
 export const routes: RouteObject[] = [
   {
@@ -21,6 +22,10 @@ export const routes: RouteObject[] = [
       {
         path: ROTA.QUARTO.BASE,
         element: <Quarto />,
+      },
+      {
+        path: ROTA.FUNCIONARIO.BASE,
+        element: <Funcionario />,
       },
     ],
   },
