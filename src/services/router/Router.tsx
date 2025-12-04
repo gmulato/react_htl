@@ -5,6 +5,7 @@ import { DASHBOARD, ROTA } from "./url";
 import Servico from "../../views/Servico";
 import Quarto from "../../views/Quarto";
 import Funcionario from "../../views/Funcionario";
+import Hospede from "../../views/Hospede";
 
 export const routes: RouteObject[] = [
   {
@@ -27,6 +28,10 @@ export const routes: RouteObject[] = [
         path: ROTA.FUNCIONARIO.BASE,
         element: <Funcionario />,
       },
+      {
+        path: ROTA.HOSPEDE.BASE,
+        element: <Hospede />,
+      }
     ],
   },
 ];

@@ -1,6 +1,7 @@
 import { SERVICO } from "../servico/constants/servico.constants";
 import { QUARTO } from "../quarto/constants/quarto.constants";
 import { FUNCIONARIO } from "../funcionario/constants/funcionario.constants";
+import { HOSPEDE } from "../hospede/constants/hospede.constants";
 
 const ROTA_SISTEMA = "sistema";
 export const DASHBOARD = `/${ROTA_SISTEMA}/dashboard`;
@@ -27,4 +28,5 @@ export const ROTA = {
   SERVICO: gerarRotaSistema(SERVICO.ALIAS),
   QUARTO: gerarRotaSistema(QUARTO.ALIAS),
   FUNCIONARIO: gerarRotaSistema(FUNCIONARIO.ALIAS),
+  HOSPEDE: gerarRotaSistema(HOSPEDE.ALIAS),
 };
